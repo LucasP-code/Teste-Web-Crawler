@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-import gc
 
 def Links_Pulverizadores():
     links = []
@@ -40,7 +39,8 @@ def Info_Pulverizadores(links):
 
         marca_modelo_pulverizador = sopa_pulv.find_all('tr', {'class': 'andes-table__row ui-vpp-striped-specs__row'})
 
-
+        marca_pulverizador = ""
+        modelo_pulverizador = ""
         for i in marca_modelo_pulverizador:
             if i.find('th', string='Marca'):
                 marca_pulverizador = i.find('td').get_text(strip=True)
@@ -48,6 +48,9 @@ def Info_Pulverizadores(links):
             if i.find('th', string='Modelo'):
                 modelo_pulverizador = i.find('td').get_text(strip=True)
                 #print(modelo_pulverizador)
+        
+        if marca_pulverizador == "" or modelo_pulverizador == "":
+            continue
 
         info_pulverizadores.append([nome_pulverizador, valor_pulverizador, marca_pulverizador, modelo_pulverizador])
 
@@ -79,5 +82,3 @@ informacoes = Info_Pulverizadores(busca_pulverizadores)
 print(informacoes)
 Salvar_Arquivo(informacoes)
 Grafico_Pulverizadores()
-
-gc.collect()
