@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
-def spray_link():
+def get_spray_links():
     links = []
     key_words = ['pulverizador', 'costal', 'manual']
 
@@ -25,7 +25,7 @@ def spray_link():
 
     return links
 
-def spray_Info(links):
+def get_spray_info(links):
     spray_info = []
     for pulv in links:
         spray_page = get(pulv)
@@ -62,7 +62,7 @@ def save_file(info):
             for i in info:
                 writeCSV.writerow(i)
 
-def spray_median():
+def show_spray_median():
     data = pd.read_csv('pulverizadores.csv')
 
     group = data.groupby(['Marca', 'Modelo']).size().reset_index(name='Contagem')
@@ -79,11 +79,11 @@ def spray_median():
     plt.show()
 
 def main():
-    busca_pulverizadores = spray_link()
-    info = spray_Info(busca_pulverizadores)
+    links = get_spray_links()
+    info = get_spray_info(links)
     print(info)
     save_file(info)
-    spray_median()
+    show_spray_median()
 
 if __name__ == "__main__":
     main()
