@@ -64,12 +64,15 @@ def Salvar_Arquivo(informacoes):
             for i in informacoes:
                 escreverCSV.writerow(i)
 
-def Grafico_Pulverizadores():
+def Mediana_Pulverizadores():
     dados = pd.read_csv('pulverizadores.csv')
 
     agrupamento = dados.groupby(['Marca', 'Modelo']).size().reset_index(name='Contagem')
     marca_medianas_pulverizadores = agrupamento.groupby('Marca')['Contagem'].median()
+    marca_modelo_pulverizadores = agrupamento.groupby(['Marca', 'Modelo']).agg({'Contagem': 'median'}).reset_index()
     
+    marca_modelo_pulverizadores.to_csv('mediana_pulverizadores.csv', index=False)
+
     plt.figure(figsize=(10, 5))
     marca_medianas_pulverizadores.plot(kind='bar', color='orange')
     plt.xlabel('Marca')
@@ -81,4 +84,4 @@ busca_pulverizadores = Links_Pulverizadores()
 informacoes = Info_Pulverizadores(busca_pulverizadores)
 print(informacoes)
 Salvar_Arquivo(informacoes)
-Grafico_Pulverizadores()
+Mediana_Pulverizadores()
