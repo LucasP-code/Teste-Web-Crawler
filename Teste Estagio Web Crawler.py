@@ -1,85 +1,89 @@
 import csv
-from requests import *
+from requests import get
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
-def Links_Pulverizadores():
+def spray_link():
     links = []
-    palavras_chave = ['pulverizador', 'costal', 'manual']
+    key_words = ['pulverizador', 'costal', 'manual']
 
-    pagina_mercado_livre = get("https://lista.mercadolivre.com.br/pulverizador-costal-manual#D[A:pulverizador%20costal%20manual]")
+    page_mercado_livre = get("https://lista.mercadolivre.com.br/pulverizador-costal-manual#D[A:pulverizador%20costal%20manual]")
 
-    sopa_mercado_livre = BeautifulSoup(pagina_mercado_livre.content, 'html.parser')
+    soup_mercado_livre = BeautifulSoup(page_mercado_livre.content, 'html.parser')
 
-    pulverizadores = sopa_mercado_livre.find('ol', {'class': 'ui-search-layout ui-search-layout--grid'})
-    lista_pulverizadores = pulverizadores.find_all('li', {'class': 'ui-search-layout__item'})
+    spray = soup_mercado_livre.find('ol', {'class': 'ui-search-layout ui-search-layout--grid'})
+    spray_list = spray.find_all('li', {'class': 'ui-search-layout__item'})
 
-    for i in lista_pulverizadores:
-        nome_pulverizadores = i.find('h2', {'class': 'poly-box poly-component__title'}).get_text()
+    for i in spray_list:
+        spray_name = i.find('h2', {'class': 'poly-box poly-component__title'}).get_text()
 
-        if all(palavra in nome_pulverizadores.lower() for palavra in palavras_chave):    
-            link_pulverizador = i.find('a')
-            links.append(link_pulverizador.get('href'))
+        if all(word in spray_name.lower() for word in key_words):    
+            spray_link = i.find('a')
+            links.append(spray_link.get('href'))
 
     return links
 
-def Info_Pulverizadores(links):
-    info_pulverizadores = []
+def spray_Info(links):
+    spray_info = []
     for pulv in links:
-        pagina_pulv = get(pulv)
-        sopa_pulv = BeautifulSoup(pagina_pulv.content, 'html.parser')
+        spray_page = get(pulv)
+        spray_soup = BeautifulSoup(spray_page.content, 'html.parser')
 
-        nome_pulverizador = sopa_pulv.find('h1', {'class': 'ui-pdp-title'}).get_text()
+        spray_name = spray_soup.find('h1', {'class': 'ui-pdp-title'}).get_text()
 
-        preco_pulverizador = sopa_pulv.find('div', {'class': 'ui-pdp-price__second-line'})
+        spray_price = spray_soup.find('div', {'class': 'ui-pdp-price__second-line'})
 
-        valor_pulverizador = preco_pulverizador.find('span', {'class': 'andes-money-amount__fraction'}).get_text()
+        spray_value = spray_price.find('span', {'class': 'andes-money-amount__fraction'}).get_text()
 
-        marca_modelo_pulverizador = sopa_pulv.find_all('tr', {'class': 'andes-table__row ui-vpp-striped-specs__row'})
+        spray_brand_model = spray_soup.find_all('tr', {'class': 'andes-table__row ui-vpp-striped-specs__row'})
 
-        marca_pulverizador = ""
-        modelo_pulverizador = ""
-        for i in marca_modelo_pulverizador:
+        spray_brand = ""
+        spray_model = ""
+        for i in spray_brand_model:
             if i.find('th', string='Marca'):
-                marca_pulverizador = i.find('td').get_text(strip=True)
+                spray_brand = i.find('td').get_text(strip=True)
             if i.find('th', string='Modelo'):
-                modelo_pulverizador = i.find('td').get_text(strip=True)
+                spray_model = i.find('td').get_text(strip=True)
         
-        if marca_pulverizador == "" or modelo_pulverizador == "":
+        if spray_brand == "" or spray_model == "":
             continue
 
-        info_pulverizadores.append([nome_pulverizador, valor_pulverizador, marca_pulverizador, modelo_pulverizador])
+        spray_info.append([spray_name, spray_value, spray_brand, spray_model])
 
-    return info_pulverizadores
+    return spray_info
 
-def Salvar_Arquivo(informacoes):
+def save_file(info):
     if not os.path.exists('pulverizadores.csv'):
-        with open('pulverizadores.csv', 'w', encoding="utf-8", newline='') as arquivo:
-            escreverCSV = csv.writer(arquivo)
-            escreverCSV.writerow(['Nome', 'Preco', 'Marca', 'Modelo'])
-            for i in informacoes:
-                escreverCSV.writerow(i)
+        with open('pulverizadores.csv', 'w', encoding="utf-8", newline='') as file:
+            writeCSV = csv.writer(file)
+            writeCSV.writerow(['Nome', 'Preco', 'Marca', 'Modelo'])
+            for i in info:
+                writeCSV.writerow(i)
 
-def Mediana_Pulverizadores():
-    dados = pd.read_csv('pulverizadores.csv')
+def spray_median():
+    data = pd.read_csv('pulverizadores.csv')
 
-    agrupamento = dados.groupby(['Marca', 'Modelo']).size().reset_index(name='Contagem')
-    marca_medianas_pulverizadores = agrupamento.groupby('Marca')['Contagem'].median()
-    marca_modelo_pulverizadores = agrupamento.groupby(['Marca', 'Modelo']).agg({'Contagem': 'median'}).reset_index()
+    group = data.groupby(['Marca', 'Modelo']).size().reset_index(name='Contagem')
+    spray_brand_median = group.groupby('Marca')['Contagem'].median()
+    spray_brand_model = group.groupby(['Marca', 'Modelo']).agg({'Contagem': 'median'}).reset_index()
     
-    marca_modelo_pulverizadores.to_csv('mediana_pulverizadores.csv', index=False)
+    spray_brand_model.to_csv('mediana_pulverizadores.csv', index=False)
 
     plt.figure(figsize=(10, 5))
-    marca_medianas_pulverizadores.plot(kind='bar', color='orange')
+    spray_brand_median.plot(kind='bar', color='orange')
     plt.xlabel('Marca')
     plt.ylabel('Mediana dos Modelos')
     plt.title('Mediana de Pulverizadores por Marca/Modelo')
     plt.show()
 
-busca_pulverizadores = Links_Pulverizadores()
-informacoes = Info_Pulverizadores(busca_pulverizadores)
-print(informacoes)
-Salvar_Arquivo(informacoes)
-Mediana_Pulverizadores()
+def main():
+    busca_pulverizadores = spray_link()
+    info = spray_Info(busca_pulverizadores)
+    print(info)
+    save_file(info)
+    spray_median()
+
+if __name__ == "__main__":
+    main()
