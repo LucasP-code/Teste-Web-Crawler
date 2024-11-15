@@ -44,10 +44,8 @@ def Info_Pulverizadores(links):
         for i in marca_modelo_pulverizador:
             if i.find('th', string='Marca'):
                 marca_pulverizador = i.find('td').get_text(strip=True)
-                #print(marca_pulverizador)
             if i.find('th', string='Modelo'):
                 modelo_pulverizador = i.find('td').get_text(strip=True)
-                #print(modelo_pulverizador)
         
         if marca_pulverizador == "" or modelo_pulverizador == "":
             continue
